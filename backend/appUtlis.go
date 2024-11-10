@@ -8,7 +8,7 @@ import (
 )
 
 type ConfigUtils struct {
-	MongoConfig string 
+	MongoConfig string `yaml:"MongoConfig"`
 }
 
 func get_config() (*ConfigUtils, error) {
