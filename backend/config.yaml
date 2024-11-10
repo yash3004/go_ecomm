@@ -1,1 +1,1 @@
-mongoConfig: "mongodb://localhost:27017"
+MongoConfig: mongodb+srv://yashsehgal9253:yash3004@cluster0.evd2l95.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
