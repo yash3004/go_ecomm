@@ -1,12 +1,24 @@
 package main
 
-import "hash"
-
 type User struct {
+	UserID         string
+	Username       string
+	Password       string
+	Email          string
+	CartID         string
+	TransanctionId string
+	PhoneNo        string
+}
+
+type ReadUser struct {
 	UserID   string
 	Username string
-	Password hash.Hash64
-	Email string 
-	CartID string 
-	TransanctionId string 
+	Email    string
+	PhoneNo  string
+}
+
+type AuthUser struct {
+	UserID   *string
+	Username *string
+	Password string
 }

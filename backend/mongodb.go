@@ -8,15 +8,17 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
+	"golang.org/x/crypto/bcrypt"
 )
 
-
-
-type MongoService interface {
+type AuthService interface {
 	Create(u User) error
 	Read(_id string) (*User, error)
 	Update(_id string, updatedUser User) error
 	Delete(_id string) error
+}
+
+type CartService interface {
 }
 
 type MongoHandler struct {
@@ -43,12 +45,14 @@ func NewMongoHandler(mongoURI, dbName, collectionName string) (*MongoHandler, er
 func (mh *MongoHandler) Create(u User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
+	hashed_pass, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+	u.Password = string(hashed_pass)
 
-	_, err := mh.collection.InsertOne(ctx, u)
+	data, err := mh.collection.InsertOne(ctx, u)
 	if err != nil {
 		return fmt.Errorf("error inserting document: %v", err)
 	}
-	fmt.Println("Document inserted successfully")
+	fmt.Printf("Document inserted successfully , %v", data)
 	return nil
 }
 
@@ -57,7 +61,7 @@ func (mh *MongoHandler) Read(_id string) (*User, error) {
 	defer cancel()
 
 	var result User
-	err := mh.collection.FindOne(ctx, bson.M{"_id": _id}).Decode(&result)
+	err := mh.collection.FindOne(ctx, bson.M{"user_id": _id}).Decode(&result)
 	if err != nil {
 		return nil, fmt.Errorf("error finding document: %v", err)
 	}
@@ -69,7 +73,7 @@ func (mh *MongoHandler) Update(_id string, updatedUser User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	filter := bson.M{"_id": _id}
+	filter := bson.M{"user_id": _id}
 	update := bson.M{"$set": updatedUser}
 	_, err := mh.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
