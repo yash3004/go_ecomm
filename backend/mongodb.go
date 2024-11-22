@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"time"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
@@ -46,6 +47,9 @@ func (mh *MongoHandler) Create(u User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	hashed_pass, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+	if err != nil {
+		log.Printf("error occured while hashing the password %v", err)
+	}
 	u.Password = string(hashed_pass)
 
 	data, err := mh.collection.InsertOne(ctx, u)

@@ -76,7 +76,10 @@ func validateUser(mh *MongoHandler) http.HandlerFunc {
 		if err := json.Unmarshal(auth_user, &user); err != nil {
 			log.Printf("error while parsing validation")
 		}
-		saved_user, err := mh.Read(*user.UserID)
+		saved_user, mongo_err := mh.Read(*user.UserID)
+		if mongo_err != nil {
+			log.Printf("error while getting the user details %v", err)
+		}
 
 		hash_err := bcrypt.CompareHashAndPassword([]byte(saved_user.Password), []byte(user.Password))
 		if hash_err != nil {
