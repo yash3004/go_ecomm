@@ -68,6 +68,7 @@ func getUser(mh *MongoHandler) http.HandlerFunc {
 func validateUser(mh *MongoHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		auth_user, err := io.ReadAll(r.Body)
+		defer r.Body.Close()
 		if err != nil {
 			log.Printf("error occured while fetching the user id password ")
 		}
@@ -75,22 +76,65 @@ func validateUser(mh *MongoHandler) http.HandlerFunc {
 
 		if err := json.Unmarshal(auth_user, &user); err != nil {
 			log.Printf("error while parsing validation")
+			return
 		}
-		saved_user, mongo_err := mh.Read(*user.UserID)
+		log.Printf(user.UserID, user.Password, user.Username)
+		saved_user, mongo_err := mh.Read(user.UserID)
 		if mongo_err != nil {
-			log.Printf("error while getting the user details %v", err)
+			log.Printf("error while getting the user details %v", mongo_err)
+			return
 		}
 
-		hash_err := bcrypt.CompareHashAndPassword([]byte(saved_user.Password), []byte(user.Password))
-		if hash_err != nil {
+		hashErr := bcrypt.CompareHashAndPassword([]byte(saved_user.Password), []byte(user.Password))
+		if hashErr != nil {
+			// Password does not match
 			response := map[string]string{"login": "failed"}
-			json_data, _ := json.Marshal(response)
-
-			w.Write(json_data)
+			w.Header().Set("Content-Type", "application/json")
+			jsonData, _ := json.Marshal(response)
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write(jsonData)
+			return
 		}
+
+		// Password matches
 		response := map[string]string{"login": "success"}
-		json_data, _ := json.Marshal(response)
-		w.Write(json_data)
+		w.Header().Set("Content-Type", "application/json")
+		jsonData, _ := json.Marshal(response)
+		w.WriteHeader(http.StatusOK)
+		w.Write(jsonData)
+
+	}
+}
+
+func deleteUser(mh *MongoHandler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		del_user, fetch_err := io.ReadAll(r.Body)
+		defer r.Body.Close()
+		if fetch_err != nil {
+			log.Printf("cant fetch the data ,%v ", fetch_err)
+			return
+		}
+		var user AuthUser
+		if err := json.Unmarshal(del_user, &user); err != nil {
+			log.Printf("cant parse the data to auth user struct %v", err)
+			return
+		}
+
+		if err := mh.Delete(user.UserID); err != nil {
+			log.Printf("cant delete the user %v with the error %v", user.UserID, err)
+			response := map[string]string{"delete": "failed"}
+			w.Header().Set("Content-Type", "application/json")
+			jsonData, _ := json.Marshal(response)
+			w.WriteHeader(http.StatusFailedDependency)
+			w.Write(jsonData)
+			return
+		}
+
+		response := map[string]string{"delete": "success"}
+		w.Header().Set("Content-Type", "application/json")
+		jsonData, _ := json.Marshal(response)
+		w.WriteHeader(http.StatusOK)
+		w.Write(jsonData)
 
 	}
 }
@@ -101,4 +145,5 @@ func RegisterRoutes(mh *MongoHandler) {
 	http.HandleFunc("/create_user", createUser(mh))
 	http.HandleFunc("/get_user/{id}", getUser(mh))
 	http.HandleFunc("/validate_user", validateUser(mh))
+	http.HandleFunc("/delete_user", deleteUser(mh))
 }

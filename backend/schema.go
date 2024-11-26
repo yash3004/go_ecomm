@@ -18,7 +18,7 @@ type ReadUser struct {
 }
 
 type AuthUser struct {
-	UserID   *string
-	Username *string
+	UserID   string
+	Username string
 	Password string
 }

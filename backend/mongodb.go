@@ -65,7 +65,7 @@ func (mh *MongoHandler) Read(_id string) (*User, error) {
 	defer cancel()
 
 	var result User
-	err := mh.collection.FindOne(ctx, bson.M{"user_id": _id}).Decode(&result)
+	err := mh.collection.FindOne(ctx, bson.M{"userid": _id}).Decode(&result)
 	if err != nil {
 		return nil, fmt.Errorf("error finding document: %v", err)
 	}
@@ -77,7 +77,7 @@ func (mh *MongoHandler) Update(_id string, updatedUser User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	filter := bson.M{"user_id": _id}
+	filter := bson.M{"userid": _id}
 	update := bson.M{"$set": updatedUser}
 	_, err := mh.collection.UpdateOne(ctx, filter, update)
 	if err != nil {
@@ -91,7 +91,7 @@ func (mh *MongoHandler) Delete(_id string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := mh.collection.DeleteOne(ctx, bson.M{"_id": _id})
+	_, err := mh.collection.DeleteOne(ctx, bson.M{"userid": _id})
 	if err != nil {
 		return fmt.Errorf("error deleting document: %v", err)
 	}
