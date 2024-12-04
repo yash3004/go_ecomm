@@ -40,16 +40,6 @@ func createUser(mh *Mongodb.MongoHandler) http.HandlerFunc {
 
 func getUser(mh *Mongodb.MongoHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// request_body, err := io.ReadAll(r.Body)
-		// if err != nil {
-		// 	log.Printf("error occured while fetching the request body %v", err)
-		// }
-		// defer r.Body.Close()
-		// var user_id string
-		// if err := json.Unmarshal(request_body, &user_id); err != nil {
-		// 	log.Printf("error while parsing the user_id , %v", err)
-
-		// }
 		user_id := r.PathValue("id")
 		user, err := Read(mh, user_id)
 		read_user := ReadUser{user.UserID, user.Username, user.Email, user.PhoneNo}
@@ -88,7 +78,6 @@ func validateUser(mh *Mongodb.MongoHandler) http.HandlerFunc {
 
 		hashErr := bcrypt.CompareHashAndPassword([]byte(saved_user.Password), []byte(user.Password))
 		if hashErr != nil {
-			// Password does not match
 			response := map[string]string{"login": "failed"}
 			w.Header().Set("Content-Type", "application/json")
 			jsonData, _ := json.Marshal(response)
@@ -140,11 +129,26 @@ func deleteUser(mh *Mongodb.MongoHandler) http.HandlerFunc {
 	}
 }
 
+func addAddr(mh *Mongodb.MongoHandler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+	}
+}
+
+func updateAddr(mh *Mongodb.MongoHandler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+	}
+}
+
 // Register the routes
-func RegisterRoutes(mh *Mongodb.MongoHandler) {
+func RegisterUsersRoutes(mh *Mongodb.MongoHandler) {
 	http.HandleFunc("/welcome", welcomeRoutes)
 	http.HandleFunc("/create_user", createUser(mh))
 	http.HandleFunc("/get_user/{id}", getUser(mh))
 	http.HandleFunc("/validate_user", validateUser(mh))
 	http.HandleFunc("/delete_user", deleteUser(mh))
+	http.HandleFunc("/add_address/{id}", addAddr(mh))
+	http.HandleFunc("/update_address/{id}", updateAddr(mh))
+
 }

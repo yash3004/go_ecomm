@@ -18,7 +18,7 @@ func startServer(host string, port int) error {
 	if mongoHandler_err != nil {
 		log.Printf("error while loading mongodb %v", mongoHandler_err)
 	}
-	Users.RegisterRoutes(mh)
+	Users.RegisterUsersRoutes(mh)
 
 	return http.ListenAndServe(fmt.Sprintf("%v:%d", host, port), nil)
 }

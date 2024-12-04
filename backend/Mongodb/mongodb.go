@@ -10,22 +10,19 @@ import (
 )
 
 type MongoHandler struct {
-	Client     *mongo.Client
-	Database   *mongo.Database
-	Collection *mongo.Collection
+	Client   *mongo.Client
+	Database *mongo.Database
 }
 
-func NewMongoHandler(mongoURI, dbName, collectionName string) (*MongoHandler, error) {
+func NewMongoHandler(mongoURI, dbName string) (*MongoHandler, error) {
 	client, err := mongo.Connect(options.Client().ApplyURI(mongoURI))
 	if err != nil {
 		return nil, fmt.Errorf("error creating MongoDB client: %v", err)
 	}
 	database := client.Database(dbName)
-	collection := database.Collection(collectionName)
 	return &MongoHandler{
-		Client:     client,
-		Database:   database,
-		Collection: collection,
+		Client:   client,
+		Database: database,
 	}, nil
 }
 
