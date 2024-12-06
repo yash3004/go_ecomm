@@ -1,0 +1,44 @@
+syntax = "proto3";
+package Schema;
+option go_package = "go_ecomm/SchemasProto;schemasproto";
+
+message User{
+    string user_id = 1;
+    string username = 2;
+    string password = 3;
+    string public_id = 4;
+    string first_name =5;
+    string middle_name = 6;
+    string last_name = 7;
+    string email = 8;
+    string phone_no = 9;
+}
+
+message ValidateUser{
+    string user_name = 1;
+    string user_id  = 2;
+    string password = 3;
+}
+
+message PublicUser{
+    string user_id = 1;
+    string username = 2;
+    string public_id = 3;
+    string first_name =4;
+    string middle_name = 5;
+    string last_name = 6;
+    string email = 7;
+    string phone_no = 8;
+}
+
+
+message UserAddress{
+    string addr_id = 1;
+    string user_id =2;
+    string country = 3;
+    string state = 4;
+    string city = 5;
+    string address1 = 6;
+    string address2 = 7;
+    int32 postalcode = 8;
+}
