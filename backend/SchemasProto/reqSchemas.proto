@@ -1,6 +1,6 @@
 syntax = "proto3";
 package Schema;
-option go_package = "go_ecomm/SchemasProto;schemasproto";
+option go_package = "go_ecomm/SchemasProto;Schema";
 
 message User{
     string user_id = 1;

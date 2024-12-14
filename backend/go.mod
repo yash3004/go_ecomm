@@ -7,6 +7,8 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
+require google.golang.org/protobuf v1.35.2
+
 require (
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect

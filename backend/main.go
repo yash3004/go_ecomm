@@ -13,10 +13,12 @@ func startServer(host string, port int) error {
 	cfg, config_err := get_config()
 	if config_err != nil {
 		log.Printf("error while loading the configurations %v ", config_err)
+		return config_err
 	}
-	mh, mongoHandler_err := Mongodb.NewMongoHandler(cfg.MongoConfig, "testdb", "Users")
+	mh, mongoHandler_err := Mongodb.NewMongoHandler(cfg.MongoConfig, "testdb")
 	if mongoHandler_err != nil {
 		log.Printf("error while loading mongodb %v", mongoHandler_err)
+		return mongoHandler_err
 	}
 	Users.RegisterUsersRoutes(mh)
 

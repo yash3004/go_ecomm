@@ -7,12 +7,13 @@ import (
 	"time"
 
 	"go_ecomm/Mongodb"
+	"go_ecomm/Schema"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func Create(mh *Mongodb.MongoHandler, u User) error {
+func Create(mh *Mongodb.MongoHandler, u *Schema.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -31,11 +32,11 @@ func Create(mh *Mongodb.MongoHandler, u User) error {
 	return nil
 }
 
-func Read(mh *Mongodb.MongoHandler, _id string) (*User, error) {
+func Read(mh *Mongodb.MongoHandler, _id string) (*Schema.User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	var result User
+	var result Schema.User
 	err := mh.Database.Collection("Users").FindOne(ctx, bson.M{"userid": _id}).Decode(&result)
 	if err != nil {
 		return nil, fmt.Errorf("error finding document: %v", err)
@@ -44,7 +45,7 @@ func Read(mh *Mongodb.MongoHandler, _id string) (*User, error) {
 	return &result, nil
 }
 
-func Update(mh *Mongodb.MongoHandler, _id string, updatedUser User) error {
+func Update(mh *Mongodb.MongoHandler, _id string, updatedUser *Schema.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -70,7 +71,7 @@ func Delete(mh *Mongodb.MongoHandler, _id string) error {
 	return nil
 }
 
-func addAddress(mh *Mongodb.MongoHandler, userAddr UserAddress) error {
+func addAddress(mh *Mongodb.MongoHandler, userAddr *Schema.UserAddress) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	_, err := mh.Database.Collection("UserAddress").InsertOne(ctx, userAddr)
@@ -80,7 +81,7 @@ func addAddress(mh *Mongodb.MongoHandler, userAddr UserAddress) error {
 	return nil
 }
 
-func updateAddress(mh *Mongodb.MongoHandler, user_id string, userAddr UserAddress) error {
+func updateAddress(mh *Mongodb.MongoHandler, user_id string, userAddr *Schema.UserAddress) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	filter := bson.M{"user_id": user_id}
