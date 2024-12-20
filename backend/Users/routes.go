@@ -27,10 +27,15 @@ func createUser(mh *Mongodb.MongoHandler) http.HandlerFunc {
 
 		defer r.Body.Close()
 		var user *Schema.User
+		if err := json.Unmarshal(request_body, &user); err != nil {
+			log.Printf("Error while parsing the data")
+			http.Error(w, "INVALID REQUEST PAYLOAD", http.StatusBadRequest)
+		}
+		log.Println(user)
 		if user.UserId == "" {
-			response := map[string]string{"error": "please give user_id"}
-			jsonData, _ := json.Marshal(response)
-			w.Write(jsonData)
+			log.Printf("not getting the userid")
+			http.Error(w, "USER ID NOT FOUND", http.StatusBadRequest)
+			return
 		}
 		if err := json.Unmarshal(request_body, &user); err != nil {
 			log.Printf("error while parsing to the user  %v", err)
@@ -83,12 +88,14 @@ func validateUser(mh *Mongodb.MongoHandler) http.HandlerFunc {
 
 		if err := json.Unmarshal(auth_user, &user); err != nil {
 			log.Printf("error while parsing validation")
+			http.Error(w, "INVALID REQUEST PAYLOAD", http.StatusBadRequest)
 			return
 		}
 		log.Printf(user.UserId, user.Password, user.UserName)
 		saved_user, mongo_err := Read(mh, user.UserId)
 		if mongo_err != nil {
 			log.Printf("error while getting the user details %v", mongo_err)
+			http.Error(w, "DB ERROR", http.StatusConflict)
 			return
 		}
 
@@ -147,6 +154,32 @@ func deleteUser(mh *Mongodb.MongoHandler) http.HandlerFunc {
 
 func addAddr(mh *Mongodb.MongoHandler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		userId := r.PathValue("id")
+		log.Printf("user id : %v", userId)
+		raw_addr, err := io.ReadAll(r.Body)
+		if err != nil {
+			log.Fatalf("cant get the user request %v", err)
+		}
+		var userAddr Schema.UserAddress
+		json_Err := json.Unmarshal(raw_addr, &userAddr)
+		if json_Err != nil {
+			log.Printf("cant parse to json ")
+			http.Error(w, "INVALID REQUEST", http.StatusBadRequest)
+			return
+		}
+		fmt.Println(userAddr.Address1)
+		userAddr.UserId = userId
+		if err := addAddress(mh, &userAddr); err != nil {
+			log.Printf("error occur while adding to db")
+			http.Error(w, "CANT ADD TO DB", http.StatusConflict)
+			return
+		}
+		log.Printf("Address added successfully")
+		response := map[string]string{"process": "success"}
+		w.Header().Set("Content-Type", "application/json")
+		jsonData, _ := json.Marshal(response)
+		w.WriteHeader(http.StatusOK)
+		w.Write(jsonData)
 
 	}
 }
